@@ -726,14 +726,14 @@ def process_token_features(  # noqa: C901, PLR0915, PLR0912
                     token["mol_type"] == const.chain_type_ids["NONPOLYMER"]
                     and (token["asym_id"], token["atom_idx"]) in contacts
                 ):
-                    contact_conditioning[binder_mask][:, idx] = (
+                    contact_conditioning[binder_mask, idx] = (
                         const.contact_conditioning_info["BINDER>POCKET"]
                     )
-                    contact_conditioning[idx][binder_mask] = (
+                    contact_conditioning[idx, binder_mask] = (
                         const.contact_conditioning_info["POCKET>BINDER"]
                     )
-                    contact_threshold[binder_mask][:, idx] = max_distance
-                    contact_threshold[idx][binder_mask] = max_distance
+                    contact_threshold[binder_mask, idx] = max_distance
+                    contact_threshold[idx, binder_mask] = max_distance
 
     if binder_pocket_conditioned_prop > 0.0:
         # choose as binder a random ligand in the crop, if there are no ligands select a protein chain
