@@ -5,7 +5,7 @@ import platform
 import tarfile
 import urllib.request
 import warnings
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from functools import partial
 from multiprocessing import Pool
 from pathlib import Path
@@ -1214,6 +1214,15 @@ def predict(  # noqa: C901, PLR0915, PLR0912
         if not manifest_filtered.records:
             click.echo("Found existing affinity predictions for all inputs, skipping.")
             return
+        
+        affinity_records = []
+        for rec in manifest_filtered.records:
+            for model_idx in range(5):
+                rec_i = replace(rec, inference_options=rec.inference_options)  # shallow copy
+                rec_i.model_idx = model_idx
+                affinity_records.append(rec_i)
+
+        manifest_affinity = Manifest(affinity_records)
 
         msg = f"Running affinity prediction for {len(manifest_filtered.records)} input"
         msg += "s." if len(manifest_filtered.records) > 1 else "."
@@ -1225,7 +1234,7 @@ def predict(  # noqa: C901, PLR0915, PLR0912
         )
 
         data_module = Boltz2InferenceDataModule(
-            manifest=manifest_filtered,
+            manifest=manifest_affinity,
             target_dir=out_dir / "predictions",
             msa_dir=processed.msa_dir,
             mol_dir=mol_dir,
@@ -1236,6 +1245,7 @@ def predict(  # noqa: C901, PLR0915, PLR0912
             override_method="other",
             affinity=True,
         )
+
 
         predict_affinity_args = {
             "recycling_steps": 5,

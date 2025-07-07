@@ -60,8 +60,9 @@ def load_input(
     """
     # Load the structure
     if affinity:
+        idx = getattr(record, "model_idx", 0)
         structure = StructureV2.load(
-            target_dir / record.id / f"pre_affinity_{record.id}.npz"
+            target_dir / record.id / f"pre_affinity_{record.id}_{idx}.npz"
         )
     else:
         structure = StructureV2.load(target_dir / f"{record.id}.npz")
